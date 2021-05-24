@@ -1,19 +1,13 @@
 import React, { Component } from "react";
 
-const newHero = {
-  name: "White Adam",
-  age: 30,
-  secretIdentity: "The Rock",
-  powers: ["God", "Free money", "Light"],
-};
+// const newHero = {
+//   name: "White Adam",
+//   age: 30,
+//   secretIdentity: "The Rock",
+//   powers: ["God", "Free money", "Light"],
+// };
 
 class Hero extends Component {
-  // CSS
-  center = {
-    textAlign: "center",
-    fontWeight: "bold",
-  };
-
   constructor() {
     super();
     this.insertNewHero = this.insertNewHero.bind(this);
@@ -40,15 +34,30 @@ class Hero extends Component {
 
   // Functions
   insertNewHero = () => {
+    const encodeFormData = (data) => {
+      return Object.keys(data)
+        .map(
+          (key) => encodeURIComponent(key) + "=" + encodeURIComponent(data[key])
+        )
+        .join("&");
+    };
+
     const requestOptions = {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "application/json",
       },
-      body: JSON.stringify(newHero),
+      body: encodeFormData({
+        text: '{"status": "Great Success!"}',
+        command: "/heroes",
+      }),
     };
 
-    fetch("http://192.168.86.228:3001/api/heroes", requestOptions)
+    fetch(
+      "https://5b8667r77k.execute-api.ap-southeast-1.amazonaws.com/default/hero-update",
+      requestOptions
+    )
       .then((response) => {
         if (!response.ok) {
           return response.json().then((json) => {
@@ -59,8 +68,9 @@ class Hero extends Component {
       })
       .then((data) => {
         this.setState({ status: data.status });
-        console.log("Data Inserted");
+        console.log("Data Inserted: " + data);
       })
+      .then((json) => console.log(json))
       .catch((err) => {
         this.setState({ status: err.message });
         console.log("Catch: ", err);
@@ -72,6 +82,12 @@ class Hero extends Component {
     return status === null ? "No status" : status;
   }
 
+  // CSS
+  center = {
+    textAlign: "center",
+    fontWeight: "bold",
+  };
+
   // Bootstrap
   getBadgesClasses() {
     let classes = "badge bg-";
@@ -82,7 +98,6 @@ class Hero extends Component {
     } else {
       classes += "primary";
     }
-    // classes += this.state.status === "Failed to fetch" ? "warning" : "danger";
     return classes;
   }
 }
